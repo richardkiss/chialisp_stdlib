@@ -4,7 +4,8 @@ description = "Chialisp `.clib` standard library files"
 authors = [{name = "Richard Kiss", email = "him@richardkiss.com"}]
 license = {file = "LICENSE"}
 readme = "README.md"
-version = "0.1.0"
+version = "0.1.1"
+dependencies = ["importlib_resources"]  # this is only needed for py38
 
 [build-system]
 requires = ["setuptools>=42", "wheel"]
