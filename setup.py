@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 PACKAGES = ["chialisp_stdlib", "chialisp_stdlib.nightly", "chialisp_stdlib.stable"]
 

@@ -1,0 +1,46 @@
+(
+    (include "curry.clib")
+    (include "sha256tree.clib")
+
+    (defconstant standard_puzzle_template (a (q 2 (i 11 (q 2 (i (= 5 (point_add 11 (pubkey_for_exp (sha256 11 (a 6 (c 2 (c 23 ()))))))) (q 2 23 47) (q 8)) 1) (q 4 (c 4 (c 5 (c (a 6 (c 2 (c 23 ()))) ()))) (a 23 47))) 1) (c (q 50 2 (i (l 5) (q 11 (q . 2) (a 6 (c 2 (c 9 ()))) (a 6 (c 2 (c 13 ())))) (q 11 (q . 1) 5)) 1) 1)))
+
+    (defconstant standard_puzzle_template_hash 0xe9aaa49f45bad5c889b86ee3341550c155cfdd10c3a6757de618d20612fffd52)
+
+    ; returns (public_key signer)
+    ; The signer takes a value to be signed and returns an aggsig
+    (defun signer (private_key value)
+        (partial_signer private_key (pubkey_for_exp private_key) value)
+    )
+
+    ; returns a signer which takes a value to be signed and returns an aggsig which 
+    ; needs to be combined with the rest of the signature
+    (defun partial_signer (private_key final_public_key value)
+        (g2_multiply (g2_map (concat final_public_key value)) private_key)
+    )
+
+    (defun add_public_keys (key1 key2)
+        (point_add key1 key2)
+    )
+
+    (defun add_signatures (signature_1 signature_2)
+        (g2_add signature_1 signature_2)
+    )
+
+    (defun standard_puzzle (public_key)
+        (qq (a (q . (unquote standard_puzzle_template)) (c (q . (unquote public_key)) 1)))
+    )
+
+    ; equivalent to (shatree (standard_puzzle public_key)) but much more efficient
+    (defun standard_puzzle_hash (public_key)
+        (curry_hashes_inline standard_puzzle_template_hash public_key)
+    )
+
+    (defun std_puz_sol (conditions)
+        (qq (0 (q . (unquote conditions)) 0))
+    )
+
+    ; returns a solution maker which takes a list of conditions and returns (solution aggsig)
+    (defun standard_puzzle_solution_maker (conditions private_key)
+        (c (std_puz_sol conditions) (signer private_key (sha256tree (c q conditions))))
+    )
+)
